@@ -3,7 +3,17 @@ import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { OrderStatus } from '../models/shop.models';
 
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
+export type PaymentStatus =
+  | 'pending'
+  | 'paid'
+  | 'failed'
+  | 'refunded';
+
+export type StorePaymentMethod =
+  | 'cash_on_delivery'
+  | 'wave'
+  | 'orange_money'
+  | 'card';
 
 export interface CreateCustomerOrderInput {
   customerName: string;
@@ -11,6 +21,17 @@ export interface CreateCustomerOrderInput {
   deliveryAddress: string;
   deliveryArea?: string;
   deliveryNote?: string;
+  items: {
+    productId: string;
+    quantity: number;
+  }[];
+}
+
+export interface CreateStoreOrderInput {
+  customerName: string;
+  customerPhone?: string;
+  paymentMethod: StorePaymentMethod;
+  paymentStatus: 'pending' | 'paid';
   items: {
     productId: string;
     quantity: number;
@@ -49,8 +70,9 @@ export interface AdminOrder {
   delivery_area: string | null;
   delivery_note: string | null;
   status: OrderStatus;
-  payment_method: 'cash_on_delivery' | 'wave' | 'orange_money' | 'card';
+  payment_method: StorePaymentMethod;
   payment_status: PaymentStatus;
+  order_source: 'online' | 'store';
   subtotal: number;
   delivery_fee: number;
   total: number;
@@ -60,7 +82,8 @@ export interface AdminOrder {
 }
 
 /**
- * Service utilisé par le checkout client.
+ * Service utilisé par le checkout client
+ * et par la création des ventes en boutique.
  */
 @Injectable({
   providedIn: 'root'
@@ -68,12 +91,19 @@ export interface AdminOrder {
 export class OrderService {
   private readonly supabase = inject(SupabaseService);
 
+  /**
+   * Création d'une commande depuis le checkout client.
+   *
+   * IMPORTANT :
+   * Cette méthode conserve la fonction SQL existante
+   * create_customer_order.
+   */
   async createCustomerOrder(
     input: CreateCustomerOrderInput
   ): Promise<CreatedOrder> {
-    const { data, error } = await this.supabase.getClient().rpc(
-      'create_customer_order',
-      {
+    const { data, error } = await this.supabase
+      .getClient()
+      .rpc('create_customer_order', {
         p_customer_name: input.customerName,
         p_customer_phone: input.customerPhone,
         p_delivery_address: input.deliveryAddress,
@@ -83,17 +113,62 @@ export class OrderService {
           product_id: item.productId,
           quantity: item.quantity
         }))
-      }
-    );
+      });
 
     if (error) {
-      console.error('Erreur création commande :', error);
+      console.error('Erreur création commande client :', error);
       throw new Error(error.message);
     }
 
     if (!data || data.success !== true || !data.order_number) {
       throw new Error(
-        'La commande n’a pas pu être confirmée.'
+        'La commande client n’a pas pu être confirmée.'
+      );
+    }
+
+    return data as CreatedOrder;
+  }
+
+  /**
+   * Création d'une vente directement depuis l'administration.
+   *
+   * Cette méthode utilise une fonction SQL distincte :
+   * create_admin_store_order.
+   *
+   * Le stock est vérifié et déduit côté Supabase.
+   */
+  async createAdminStoreOrder(
+    input: CreateStoreOrderInput
+  ): Promise<CreatedOrder> {
+    if (!input.customerName.trim()) {
+      throw new Error('Le nom du client est obligatoire.');
+    }
+
+    if (!input.items.length) {
+      throw new Error('Ajoute au moins un produit à la commande.');
+    }
+
+    const { data, error } = await this.supabase
+      .getClient()
+      .rpc('create_admin_store_order', {
+        p_customer_name: input.customerName.trim(),
+        p_customer_phone: input.customerPhone?.trim() || null,
+        p_items: input.items.map(item => ({
+          product_id: item.productId,
+          quantity: item.quantity
+        })),
+        p_payment_method: input.paymentMethod,
+        p_payment_status: input.paymentStatus
+      });
+
+    if (error) {
+      console.error('Erreur création vente boutique :', error);
+      throw new Error(error.message);
+    }
+
+    if (!data || data.success !== true || !data.order_number) {
+      throw new Error(
+        'La vente boutique n’a pas pu être enregistrée.'
       );
     }
 
@@ -127,6 +202,7 @@ export class OrderAdminService {
 
     return (data ?? []).map((order: any) => ({
       ...order,
+      order_source: order.order_source ?? 'online',
       subtotal: Number(order.subtotal),
       delivery_fee: Number(order.delivery_fee),
       total: Number(order.total),
@@ -138,22 +214,23 @@ export class OrderAdminService {
       }))
     })) as AdminOrder[];
   }
-  async updateOrderStatus(
-  orderId: string,
-  status: OrderStatus
-): Promise<void> {
-  const { error } = await this.supabase
-    .getClient()
-    .from('orders')
-    .update({
-      status,
-      updated_at: new Date().toISOString()
-    })
-    .eq('id', orderId);
 
-  if (error) {
-    console.error('Erreur mise à jour commande :', error);
-    throw new Error(error.message);
+  async updateOrderStatus(
+    orderId: string,
+    status: OrderStatus
+  ): Promise<void> {
+    const { error } = await this.supabase
+      .getClient()
+      .from('orders')
+      .update({
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId);
+
+    if (error) {
+      console.error('Erreur mise à jour commande :', error);
+      throw new Error(error.message);
+    }
   }
-}
 }

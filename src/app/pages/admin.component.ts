@@ -58,10 +58,7 @@ import {
 
       <div class="side-label side-bottom-label">CONFIGURATION</div>
 
-      <button class="side-item" [class.active]="tab() === 'settings'"
-        (click)="tab.set('settings')">
-        ⚙ <span>Paramètres</span>
-      </button>
+     
 
       <button
         type="button"

@@ -23,17 +23,24 @@ import { CatalogService } from '../services/catalog.service';
         <span class="brand-mark">s.</span>
         <span>seenjaba<small>LE MARCHÉ FRAIS</small></span>
       </a>
+
       <nav>
         <a href="#catalogue">Nos produits</a>
         <a href="#engagements">Notre engagement</a>
         <a href="#footer">Contact</a>
       </nav>
+
       <div class="header-actions">
         <button class="icon-btn" aria-label="Rechercher">⌕</button>
+
         <a class="cart-link" routerLink="/panier">
           Panier <b>{{ cart.count() }}</b>
         </a>
-        <a class="admin-link" routerLink="/admin">Espace pro ↗</a>
+
+        <a class="admin-link" routerLink="/admin">
+          <span class="admin-desktop-label">Espace pro ↗</span>
+          <span class="admin-mobile-label">Pro ↗</span>
+        </a>
       </div>
     </header>
 
@@ -46,12 +53,14 @@ import { CatalogService } from '../services/catalog.service';
             Des produits frais et essentiels soigneusement sélectionnés.
             Le marché vient à vous, en quelques clics.
           </p>
+
           <div class="hero-buttons">
             <a class="btn-primary" href="#catalogue">
               Faire mes courses <span>↗</span>
             </a>
             <a class="text-link" href="#engagements">Découvrir seenjaba</a>
           </div>
+
           <div class="hero-proof">
             <div class="avatar-stack"><b>A</b><b>M</b><b>F</b></div>
             <span>
@@ -192,8 +201,8 @@ import { CatalogService } from '../services/catalog.service';
         <span class="brand-mark">s.</span>
         <span>seenjaba<small>LE MARCHÉ FRAIS</small></span>
       </a>
-       <span>Adresse: Mbour Saly, Salon d'or en face clinique Aida</span>
-       <span>Téléphone : +221 78 018 83 18</span>
+      <span>Adresse: Mbour Saly, Salon d'or en face clinique Aida</span>
+      <span>Téléphone : +221 78 018 83 18</span>
       <span>Le marché frais, à portée de clic.</span>
       <span>© 2026 seenjaba</span>
     </footer>
@@ -204,6 +213,7 @@ import { CatalogService } from '../services/catalog.service';
   </div>
   `
 })
+
 export class StorefrontComponent implements OnInit {
   readonly cart: CartService;
 
@@ -255,6 +265,7 @@ export class StorefrontComponent implements OnInit {
 
     if (categoriesResult.status === 'fulfilled') {
       this.categories.set(categoriesResult.value);
+
       console.log(
         'Catégories récupérées depuis Supabase :',
         categoriesResult.value

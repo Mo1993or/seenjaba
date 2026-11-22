@@ -39,7 +39,7 @@ import { CatalogService } from '../services/catalog.service';
 
         <a class="admin-link" routerLink="/admin">
           <span class="admin-desktop-label">Espace pro ↗</span>
-          <span class="admin-mobile-label">Pro ↗</span>
+          <span class="admin-mobile-label">Espace pro ↗</span>
         </a>
       </div>
     </header>
@@ -58,7 +58,9 @@ import { CatalogService } from '../services/catalog.service';
             <a class="btn-primary" href="#catalogue">
               Faire mes courses <span>↗</span>
             </a>
-            <a class="text-link" href="#engagements">Découvrir seenjaba</a>
+            <a class="text-link" href="#engagements">
+              Découvrir seenjaba
+            </a>
           </div>
 
           <div class="hero-proof">
@@ -133,7 +135,9 @@ import { CatalogService } from '../services/catalog.service';
             <span class="eyebrow">LA SÉLECTION seenjaba</span>
             <h2>Les bons produits du moment</h2>
           </div>
-          <a class="text-link" href="#catalogue">Voir tout le marché ↗</a>
+          <a class="text-link" href="#catalogue">
+            Voir tout le marché ↗
+          </a>
         </div>
 
         <div class="product-grid">
@@ -160,11 +164,13 @@ import { CatalogService } from '../services/catalog.service';
                 <div class="product-info">
                   <small>{{ product.category }}</small>
                   <h3>{{ product.name }}</h3>
+
                   <div class="product-bottom">
                     <div>
                       <strong>{{ product.price | number:'1.0-0' }} FCFA</strong>
                       <small>/ {{ product.unit }}</small>
                     </div>
+
                     <button
                       class="add-btn"
                       (click)="add(product)"
@@ -188,6 +194,7 @@ import { CatalogService } from '../services/catalog.service';
             la fraîcheur et le plaisir de faire son marché simplement.
           </p>
         </div>
+
         <div class="promise-points">
           <span>✓ Une sélection attentive</span>
           <span>✓ Des prix affichés clairement</span>
@@ -201,6 +208,7 @@ import { CatalogService } from '../services/catalog.service';
         <span class="brand-mark">s.</span>
         <span>seenjaba<small>LE MARCHÉ FRAIS</small></span>
       </a>
+
       <span>Adresse: Mbour Saly, Salon d'or en face clinique Aida</span>
       <span>Téléphone : +221 78 018 83 18</span>
       <span>Le marché frais, à portée de clic.</span>
@@ -211,9 +219,132 @@ import { CatalogService } from '../services/catalog.service';
       <div class="toast">✓ {{ toast() }}</div>
     }
   </div>
-  `
-})
+  `,
+  styles: [`
+    /* CORRECTION HEADER RESPONSIVE */
 
+    .site-header {
+      min-width: 0;
+    }
+
+    .site-header .header-actions {
+      display: flex !important;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .site-header .admin-link {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      visibility: visible !important;
+      opacity: 1 !important;
+      white-space: nowrap;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .site-header .admin-mobile-label {
+      display: none;
+    }
+
+    @media screen and (max-width: 768px) {
+
+      .topline {
+        display: none !important;
+      }
+
+      .site-header {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+        box-sizing: border-box !important;
+      }
+
+      .site-header .brand {
+        display: inline-flex !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .site-header nav {
+        display: none !important;
+      }
+
+      .site-header .header-actions {
+        display: flex !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex-wrap: nowrap !important;
+        box-sizing: border-box !important;
+      }
+
+      .site-header .icon-btn {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0 !important;
+      }
+
+      .site-header .cart-link {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+      }
+
+      .site-header .admin-link {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+        padding: 10px 14px !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        font-size: 13px !important;
+        box-sizing: border-box !important;
+      }
+
+      .site-header .admin-desktop-label {
+        display: inline !important;
+      }
+
+      .site-header .admin-mobile-label {
+        display: none !important;
+      }
+    }
+
+    @media screen and (max-width: 380px) {
+      .site-header {
+        padding: 12px !important;
+      }
+
+      .site-header .header-actions {
+        gap: 8px !important;
+      }
+
+      .site-header .admin-link {
+        padding: 9px 10px !important;
+        font-size: 12px !important;
+      }
+    }
+  `]
+})
 export class StorefrontComponent implements OnInit {
   readonly cart: CartService;
 
